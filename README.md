@@ -1,0 +1,116 @@
+# Export VM from On-Premise to AWS
+
+1. Export virtual machine from On-premise
+
+Go to VMWare Workstation, select the virtual machine, select File, and select Export to OVF…
+Choose the location to save the export file.
+Wait about 5 minutes to export.
+Access to the virtual machine export location, the file we use will be the .vmdk file
+
+2. Upload virtual machine to AWS
+
+Create S3 bucket to store virtual machines
+Bucket name: This name must be unique and not duplicate. (Example: import-bucket-2025).
+Region: Select the storage region of the bucket.
+Uncheck Block all public access to allow public access. 
+Select Create bucket.
+
+3. Upload virtual machine to S3 Bucket
+
+Upload the virtual machine file that we exported in the step 1.
+It will take some time for the file to be uploaded to the S3 bucket.
+
+4. create a role named vmimport
+
+Create a file named trust-policy.json to allow the VM Import/Export service to accept your upcoming vmimport role.
+
+{
+   "Version": "2012-10-17",
+   "Statement": [
+      {
+         "Effect": "Allow",
+         "Principal": { "Service": "vmie.amazonaws.com" },
+         "Action": "sts:AssumeRole",
+         "Condition": {
+            "StringEquals":{
+               "sts:Externalid": "vmimport"
+            }
+         }
+      }
+   ]
+}
+Use the create-role command to create an IAM role named vmimport and assign trust-policy.json to the parameter --assume-role-policy-document
+aws iam create-role --role-name vmimport --assume-role-policy-document "file://trust-policy.json"
+
+Check the created role.
+
+5. Create a file role-policy.json containing the following policies.
+
+disk-image-file-bucket is the name of the S3 bucket used to store the exported files from on-premise (import-bucket-2025 in this example).
+export-bucket is the name of the S3 bucket used to export the ec2 instance that will be used for the Export VM from AWS later.
+
+{
+   "Version":"2012-10-17",
+   "Statement":[
+      {
+         "Effect": "Allow",
+         "Action": [
+            "s3:GetBucketLocation",
+            "s3:GetObject",
+            "s3:ListBucket" 
+         ],
+         "Resource": [
+            "arn:aws:s3:::import-bucket-2025",
+            "arn:aws:s3:::import-bucket-2025/*"
+         ]
+      },
+      {
+         "Effect": "Allow",
+         "Action": [
+            "s3:GetBucketLocation",
+            "s3:GetObject",
+            "s3:ListBucket",
+            "s3:PutObject",
+            "s3:GetBucketAcl"
+         ],
+         "Resource": [
+            "arn:aws:s3:::export-bucket",
+            "arn:aws:s3:::export-bucket/*"
+         ]
+      },
+      {
+         "Effect": "Allow",
+         "Action": [
+            "ec2:ModifySnapshotAttribute",
+            "ec2:CopySnapshot",
+            "ec2:RegisterImage",
+            "ec2:Describe*"
+         ],
+         "Resource": "*"
+      }
+   ]
+}
+
+Use the following command to assign the roles described in the role-policy.json file to the created vmimport role
+
+aws iam put-role-policy --role-name vmimport --policy-name vmimport --policy-document "file://role-policy.json"
+
+
+6. Import virtual machine to AMI
+
+We will use the AWS CLI to launch the Import virtual machine to AMI process.
+
+--deescription: Set description for AMI
+--disk-ccontainers: Contains information identifying VM files such as:
+Format format (eg: vhdx or vmdk)
+Storage bucket (eg import-bucket-2025)
+File path (e.g. Ubuntu.vhdx or Ubuntu-disk1.vmdk)
+
+aws ec2 import-image --description "VM Image" --disk-containers Format=vmdk,UserBucket="{S3Bucket=import-bucket-2025,S3Key=Ubuntu.vmdk}"
+
+It will take 5-10 minutes depending on the size 
+Once completed, we will see in the AMI list there will be one more AMI
+You must check that EBS is not Encrypted
+
+
+7. Now we can Deploy Instance from AMI
