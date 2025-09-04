@@ -1,29 +1,41 @@
 # Export VM from On-Premise to AWS
 
-1. Export virtual machine from On-premise
+This guide explains how to export a virtual machine from on-premise (VMWare Workstation) and import it into AWS as an AMI.
 
-Go to VMWare Workstation, select the virtual machine, select File, and select Export to OVF…
-Choose the location to save the export file.
-Wait about 5 minutes to export.
-Access to the virtual machine export location, the file we use will be the .vmdk file
+---
 
-2. Upload virtual machine to AWS
+## 1. Export Virtual Machine from On-Premise
 
-Create S3 bucket to store virtual machines
-Bucket name: This name must be unique and not duplicate. (Example: import-bucket-2025).
-Region: Select the storage region of the bucket.
-Uncheck Block all public access to allow public access. 
-Select Create bucket.
+1. Open **VMWare Workstation**.  
+2. Select the virtual machine → **File** → **Export to OVF…**  
+3. Choose the location to save the export file.  
+4. Wait ~5 minutes for export to complete.  
+5. The main file we will use is the **`.vmdk`** file.
 
-3. Upload virtual machine to S3 Bucket
+---
 
-Upload the virtual machine file that we exported in the step 1.
-It will take some time for the file to be uploaded to the S3 bucket.
+## 2. Create S3 Bucket in AWS
 
-4. create a role named vmimport
+1. Create an **S3 bucket** to store virtual machines.  
+   - **Bucket name**: must be unique (e.g., `import-bucket-2025`).  
+   - **Region**: choose appropriate AWS region.  
+   - **Access**: Uncheck **Block all public access**.  
+2. Click **Create bucket**.
 
-Create a file named trust-policy.json to allow the VM Import/Export service to accept your upcoming vmimport role.
+---
 
+## 3. Upload Virtual Machine to S3
+
+- Upload the exported `.vmdk` file from step 1 into the S3 bucket.  
+- Upload time depends on file size.
+
+---
+
+## 4. Create IAM Role for VM Import
+
+1. Create a file `trust-policy.json` with the following content:
+
+```json
 {
    "Version": "2012-10-17",
    "Statement": [
@@ -32,23 +44,30 @@ Create a file named trust-policy.json to allow the VM Import/Export service to a
          "Principal": { "Service": "vmie.amazonaws.com" },
          "Action": "sts:AssumeRole",
          "Condition": {
-            "StringEquals":{
+            "StringEquals": {
                "sts:Externalid": "vmimport"
             }
          }
       }
    ]
 }
-Use the create-role command to create an IAM role named vmimport and assign trust-policy.json to the parameter --assume-role-policy-document
+```
+
+2. Run the following command to create the IAM role:
+
+```bash
 aws iam create-role --role-name vmimport --assume-role-policy-document "file://trust-policy.json"
+```
 
-Check the created role.
+3. Verify the role is created.
 
-5. Create a file role-policy.json containing the following policies.
+---
 
-disk-image-file-bucket is the name of the S3 bucket used to store the exported files from on-premise (import-bucket-2025 in this example).
-export-bucket is the name of the S3 bucket used to export the ec2 instance that will be used for the Export VM from AWS later.
+## 5. Attach Role Policy
 
+1. Create a file `role-policy.json` with the following content:
+
+```json
 {
    "Version":"2012-10-17",
    "Statement":[
@@ -90,27 +109,40 @@ export-bucket is the name of the S3 bucket used to export the ec2 instance that 
       }
    ]
 }
+```
 
-Use the following command to assign the roles described in the role-policy.json file to the created vmimport role
+2. Attach the policy to the role:
 
+```bash
 aws iam put-role-policy --role-name vmimport --policy-name vmimport --policy-document "file://role-policy.json"
+```
 
+---
 
-6. Import virtual machine to AMI
+## 6. Import Virtual Machine to AMI
 
-We will use the AWS CLI to launch the Import virtual machine to AMI process.
+Run the following AWS CLI command:
 
---deescription: Set description for AMI
---disk-ccontainers: Contains information identifying VM files such as:
-Format format (eg: vhdx or vmdk)
-Storage bucket (eg import-bucket-2025)
-File path (e.g. Ubuntu.vhdx or Ubuntu-disk1.vmdk)
+```bash
+aws ec2 import-image   --description "VM Image"   --disk-containers Format=vmdk,UserBucket="{S3Bucket=import-bucket-2025,S3Key=Ubuntu.vmdk}"
+```
 
-aws ec2 import-image --description "VM Image" --disk-containers Format=vmdk,UserBucket="{S3Bucket=import-bucket-2025,S3Key=Ubuntu.vmdk}"
+- Replace `Ubuntu.vmdk` with your exported VM file.  
+- Import takes ~5–10 minutes depending on size.  
+- Once complete, check the **AMI list** in EC2.  
+- Ensure **EBS is not encrypted**.
 
-It will take 5-10 minutes depending on the size 
-Once completed, we will see in the AMI list there will be one more AMI
-You must check that EBS is not Encrypted
+---
+
+## 7. Deploy EC2 Instance from AMI
+
+- From the AWS Management Console, select the imported AMI.  
+- Launch a new **EC2 instance** using this AMI.  
+
+---
+
+✅ You have successfully migrated a VM from **on-premise (VMWare)** to **AWS EC2**.
+
 
 
 7. Now we can Deploy Instance from AMI
