@@ -1,6 +1,6 @@
 # Export VM from On-Premise to AWS Using VM Import/Export
 
-𝖳𝗁𝗂𝗌 𝗀𝗎𝗂𝖽𝖾 𝖾𝗑𝗉𝗅𝖺𝗂𝗇𝗌 𝗁𝗈𝗐 𝗍𝗈 𝖾𝗑𝗉𝗈𝗋𝗍 𝖺 𝗏𝗂𝗋𝗍𝗎𝖺𝗅 𝗆𝖺𝖼𝗁𝗂𝗇𝖾 𝖿𝗋𝗈𝗆 𝗈𝗇-𝗉𝗋𝖾𝗆𝗂𝗌𝖾 (𝖵𝖬𝖶𝖺𝗋𝖾 𝖶𝗈𝗋𝗄𝗌𝗍𝖺𝗍𝗂𝗈𝗇) 𝖺𝗇𝖽 𝗂𝗆𝗉𝗈𝗋𝗍 𝗂𝗍 𝗂𝗇𝗍𝗈 𝖠𝖶𝖲 𝖺𝗌 𝖺𝗇 𝖠𝖬𝖨.
+𝘛ℎ𝘪𝑠 𝑔𝘶𝑖𝘥𝑒 𝑒𝘹𝑝𝘭𝑎𝘪𝑛𝘴 𝘩𝑜𝘸 𝘵𝑜 𝑒𝘹𝑝𝘰𝑟𝘵 𝘢 𝘷𝑖𝘳𝑡𝘶𝑎𝘭 𝘮𝑎𝘤ℎ𝘪𝑛𝘦 𝘧𝑟𝘰𝑚 𝑜𝘯-𝘱𝑟𝘦𝑚𝘪𝑠𝘦 (𝑉𝘔𝑊𝘢𝑟𝘦 𝘞𝑜𝘳𝑘𝘴𝑡𝘢𝑡𝘪𝑜𝘯) 𝑎𝘯𝑑 𝑖𝘮𝑝𝘰𝑟𝘵 𝘪𝑡 𝑖𝘯𝑡𝘰 𝘈𝑊𝘚 𝘢𝑠 𝑎𝘯 𝘈𝑀𝘐.
 
 𝐕𝐌 𝐈𝐦𝐩𝐨𝐫𝐭/𝐄𝐱𝐩𝐨𝐫𝐭 is a service that allows you to import virtual machines (VMs) from your virtualized environment to Amazon EC2 and vice versa. 
 This feature allows you to migrate applications and infrastructure resources from an on-prem virtualized environment to Amazon EC2, back up your VMs to EC2, and create an archive of VMs for redundancy, and recovery after the crash. We can use VM Import/Export with no service charges (except for EC2 VMs and S3 Bucket).
