@@ -1,6 +1,5 @@
 1. Export virtual machine from On-premise
-## 🏗️ Architecture Diagram
-![Architecture Diagram](./docs/image.jpg)
+![VM Import/Export Diagram](./docs/image.jpg)
 
 Go to VMWare Workstation, select the virtual machine, select File, and select Export to OVF…
 Choose the location to save the export file.
