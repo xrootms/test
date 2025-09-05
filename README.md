@@ -1,9 +1,8 @@
-![VM Import/Export Diagram](./docs/image.jpg)
-
 # Export VM from On-Premise to AWS
 
 This guide explains how to export a virtual machine from on-premise (VMWare Workstation) and import it into AWS as an AMI.
 
+![VM Import/Export Diagram](./docs/image.jpg)
 ---
 
 ## 1. Export Virtual Machine from On-Premise
