@@ -1,4 +1,4 @@
-![VM Import/Export Diagram](WhatsApp Image 2025-09-05 at 01.43.11_9b70bbd7.jpg)
+![VM Import/Export Diagram](./docs/image.jpg)
 
 # Export VM from On-Premise to AWS
 
